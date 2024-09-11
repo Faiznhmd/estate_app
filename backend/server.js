@@ -13,6 +13,8 @@ app.get('/', (req, res) => {
   res.send('Hello world');
 });
 
+app.use(express.json()); //this will allow to upload json value
+
 app.use('/api/auth', authRoute);
 app.use('/api/posts', postRoute);
 
