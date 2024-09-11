@@ -1,5 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
 import authRoute from './routes/authRoute.js';
 import postRoute from './routes/postRoute.js';
 
@@ -14,6 +15,7 @@ app.get('/', (req, res) => {
 });
 
 app.use(express.json()); //this will allow to upload json value
+app.use(cookieParser());
 
 app.use('/api/auth', authRoute);
 app.use('/api/posts', postRoute);
