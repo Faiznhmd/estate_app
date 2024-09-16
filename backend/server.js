@@ -24,8 +24,8 @@ app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 
 app.use('/api/auth', authRoute);
 app.use('/api/users', userRoute);
-app.use('/api/posts', postRoute);
 app.use('/api/test', testRoute);
+app.use('/api/posts', postRoute);
 
 app.listen(PORT, () => {
   connectDB();
