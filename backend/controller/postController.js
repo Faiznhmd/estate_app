@@ -4,7 +4,7 @@ export const getPosts = async (req, res) => {
   try {
     const posts = await prisma.post.findMany();
     res.status(200).json(posts);
-    console.log(posts);
+    // console.log(posts);
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: 'Failed to get Post' });
@@ -16,6 +16,15 @@ export const getSinglePost = async (req, res) => {
   try {
     const post = await prisma.post.findUnique({
       where: { id },
+      include: {
+        postDetail: true,
+        user: {
+          select: {
+            username: true,
+            avatar: true,
+          },
+        },
+      },
     });
     res.status(200).json(post);
   } catch (err) {
@@ -30,8 +39,11 @@ export const addPost = async (req, res) => {
   try {
     const newPost = await prisma.post.create({
       data: {
-        ...body,
+        ...body.postData,
         userId: tokenUserId,
+        postDetail: {
+          create: body.postDetail,
+        },
       },
     });
     res.status(200).json(newPost);
