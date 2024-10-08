@@ -1,12 +1,27 @@
 import prisma from '../lib/prisma.js';
+import jwt from 'jsonwebtoken';
 
 export const getPosts = async (req, res) => {
+  const query = req.query;
+
   try {
-    const posts = await prisma.post.findMany();
-    res.status(200).json(posts);
+    const posts = await prisma.post.findMany({
+      where: {
+        city: query.city || undefined,
+        type: query.type || undefined,
+        property: query.property || undefined,
+        bedroom: parseInt(query.city) || undefined,
+        price: {
+          gte: parseInt(query.minPrice) || 0,
+          lte: parseInt(query.maaPrice) || 10000000,
+        },
+      },
+    });
+    setTimeout(() => {
+      res.status(200).json(posts);
+    }, 1000);
     // console.log(posts);
   } catch (err) {
-    console.log(err);
     res.status(500).json({ message: 'Failed to get Post' });
   }
 };
@@ -26,10 +41,29 @@ export const getSinglePost = async (req, res) => {
         },
       },
     });
-    res.status(200).json(post);
+
+    // let userId;
+    const token = req.cookies?.token;
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, async (err, payload) => {
+        if (!err) {
+          const saved = await prisma.savedPost.findUnique({
+            where: {
+              userId_postId: {
+                postId: id,
+                userId: payload.id,
+              },
+            },
+          });
+          res.status(200).json({ ...post, isSaved: saved ? true : false });
+        }
+      });
+    } else {
+      res.status(200).json({ ...post, isSaved: false });
+    }
   } catch (err) {
     console.log(err);
-    res.status(400).json({ message: 'Failed to get Post' });
+    res.status(500).json({ message: 'Failed to get Post' });
   }
 };
 
