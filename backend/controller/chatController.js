@@ -2,7 +2,6 @@ import prisma from '../lib/prisma.js';
 
 export const getChats = async (req, res) => {
   const tokenUserId = req.userId;
-  // console.log(tokenUserId, 'tokenid');
   try {
     const chats = await prisma.chat.findMany({
       where: {
@@ -14,9 +13,9 @@ export const getChats = async (req, res) => {
 
     for (const chat of chats) {
       // console.log(chat);
-      const recieverId = chat.userIDs.find((id) => id !== tokenUserId);
+      const recieverId = chat.userIDs.find((id) => id === tokenUserId);
       // console.log(recieverId, 'iddsss');
-      const reciever = await prisma.user.findUnique({
+      const receiver = await prisma.user.findUnique({
         where: {
           id: recieverId,
         },
@@ -26,9 +25,29 @@ export const getChats = async (req, res) => {
           avatar: true,
         },
       });
-      chat.reciever = reciever;
+      chat.receiver = receiver;
     }
-    res.status(200).json({ message: 'Success', data: chats });
+
+    // const updatedChats = await Promise.all(
+    //   chats.map(async (chat) => {
+    //     const receiverId = chat.userIDs.find((id) => id !== tokenUserId);
+
+    //     const receiver = await prisma.user.findUnique({
+    //       where: {
+    //         id: receiverId,
+    //       },
+    //       select: {
+    //         id: true,
+    //         username: true,
+    //         avatar: true,
+    //       },
+    //     });
+
+    //     chat.receiver = receiver;
+    //     return chat;
+    //   })
+    // );
+    res.status(200).json(chats);
   } catch (err) {
     console.log(err);
     res.status(400).json({ message: 'Failed to get Chat' });
